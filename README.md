@@ -16,7 +16,7 @@ AI coding assistants are transforming software engineering, but they introduce t
 2. **💥 Multi-Agent Collisions:** Running multiple AI agents or subagents concurrently leads to overlapping edits, dirty git trees, and destroyed progress.
 3. **🕳️ Silent Async Defects:** AIs frequently omit `await` before database mutations or wrap failing tests in empty `catch (e) {}` blocks, causing silent data loss in production.
 
-**Vibe Guardians** provides battle-tested, zero-dependency tools to eliminate these risks.
+**Vibe Guardians** provides battle-tested tools to eliminate these risks. The coordinator CLI and both test templates run with **zero runtime dependencies**; only the AST analyzer pulls in `acorn` and `acorn-walk`.
 
 ---
 
@@ -49,13 +49,13 @@ Install individual guardians into your project or global AI config:
 
 ```bash
 # Install the Design Freeze Guardian
-npx skills add <your-username>/vibe-guardians -s design-freeze-guardian -g -y
+npx skills add rowehans/vibe-guardians -s design-freeze-guardian -g -y
 
 # Install the Agent Coordinator
-npx skills add <your-username>/vibe-guardians -s agent-coordinator -g -y
+npx skills add rowehans/vibe-guardians -s agent-coordinator -g -y
 
 # Install AST Async Hygiene
-npx skills add <your-username>/vibe-guardians -s ast-async-hygiene -g -y
+npx skills add rowehans/vibe-guardians -s ast-async-hygiene -g -y
 ```
 
 ### Option B: Run the Agent Coordinator CLI directly
