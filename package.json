@@ -1,0 +1,31 @@
+{
+  "name": "vibe-guardians",
+  "version": "1.0.0",
+  "description": "Universal anti-regression guardians, design freeze test suites, and multi-agent coordination protocols for AI coding assistants",
+  "type": "module",
+  "main": "skills/agent-coordinator/scripts/agent-coord.mjs",
+  "bin": {
+    "agent-coord": "skills/agent-coordinator/scripts/agent-coord.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "ai",
+    "vibe-coding",
+    "cursor",
+    "claude-code",
+    "antigravity",
+    "windsurf",
+    "design-freeze",
+    "multi-agent",
+    "code-hygiene",
+    "guardians"
+  ],
+  "author": "Vibe Guardians Open Community",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "dependencies": {
+    "acorn": "^8.14.0",
+    "acorn-walk": "^8.3.4"
+  }
+}
