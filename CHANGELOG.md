@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **The commercial reservation is stated, not implied.** The README legal section now says outright that the original author reserves all commercial rights, spells out what counts as commercial or enterprise use (paid product, paid extension or plugin, hosted service or SaaS, client deliverable, internal company workflows), and gives the concrete channel to request a separate commercial license — GitHub Issues, deliberately not an address, so the published-surface guard stays meaningful. The permitted/prohibited table is labelled as a plain-language reading aid that cannot vary the license, and the FAQ answer now says "separate commercial license" rather than "a license". [`LICENSE`](LICENSE) is untouched: it remains byte-identical to the canonical PolyForm Noncommercial 1.0.0 text plus its single `Required Notice:` line, which is what the license asks for.
+
 ## [1.0.0] - 2026-09-21
 
 First public release.
@@ -39,4 +45,5 @@ First public release.
 - Licensed under **PolyForm Noncommercial 1.0.0**: free for noncommercial use, commercial use requires a license from the maintainers.
 - Runtime dependencies: none. `acorn` and `acorn-walk` are used only by the AST analyzer.
 
+[Unreleased]: https://github.com/rowehans/vibe-guardians/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/rowehans/vibe-guardians/releases/tag/v1.0.0

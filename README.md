@@ -117,7 +117,7 @@ Requirements: **Node 18+**. ESM only. No build step, no bundler, no test framewo
 
 **Is it a prompt, or is it enforcement?** Enforcement. Prompts are advisory and get diluted by context; a suite that fails is not. That is the entire design premise.
 
-**Can I use it commercially?** Not without a license — see below.
+**Can I use it commercially?** Not without a separate commercial license — commercial rights are reserved, see below.
 
 **What if a guard cannot check itself?** It fails. That is the point of [fail-closed builds](rules/fail-closed-builds.md).
 
@@ -131,6 +131,16 @@ Do not paste proprietary code, credentials or customer data into a repository th
 
 This project is licensed under the **PolyForm Noncommercial License 1.0.0** — the canonical text is in [`LICENSE`](LICENSE), with commercial rights reserved by the author.
 
+> ### 💼 Commercial rights are reserved (Derechos comerciales reservados)
+>
+> **The original author reserves all commercial rights.** Anything the license does not expressly grant is reserved. Commercial or enterprise use — shipping Vibe Guardians inside a paid product, a paid extension or plugin, a hosted service or SaaS, delivering it to a client, or running it as part of a company's internal workflows — requires a **separate commercial license**. The noncommercial license does not cover it, and neither does silence: if your use makes money or serves an organisation, ask first.
+>
+> **El autor original se reserva todos los derechos comerciales.** Todo lo que la licencia no concede expresamente queda reservado. El uso comercial o empresarial —incluir Vibe Guardians en un producto de pago, una extensión o plugin de pago, un servicio alojado o SaaS, entregarlo a un cliente, o usarlo en los flujos internos de una empresa— requiere una **licencia comercial aparte**. La licencia no comercial no lo cubre, y el silencio tampoco es permiso: si tu uso genera ingresos o sirve a una organización, pregúntanos antes.
+>
+> **To arrange one (Para solicitarla):** open an inquiry on [GitHub Issues](https://github.com/rowehans/vibe-guardians/issues) with the company, the product and the intended use. Commercial inquiries are answered on the same tracker as everything else.
+
+The table below is a plain-language reading aid, **not a variation of the license**: if anything in it conflicts with the text in [`LICENSE`](LICENSE), the license governs. Es un resumen para leerlo de un vistazo, no una modificación de los términos — en caso de conflicto, manda el texto de [`LICENSE`](LICENSE).
+
 | Permitted / Permitido ✅ | Prohibited / Prohibido ❌ |
 |---|---|
 | **Personal Use:** Free for individual developers and hobby projects. | **Commercial Resale:** Selling, charging for, or reselling this tool. |
@@ -139,7 +149,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0** — 
 
 ### 💼 Commercial Licensing (Licenciamiento Comercial)
 
-Are you a company, startup, or enterprise wanting to integrate Vibe Guardians into your commercial products, IDE extensions, or internal corporate workflows?
+Are you a company, startup or enterprise wanting to integrate Vibe Guardians into your commercial products, IDE extensions or internal corporate workflows? You need a commercial license for that — the reservation above explains what it covers and how to ask.
 
 **Commercial licenses are available.** Open an inquiry on [GitHub Issues](https://github.com/rowehans/vibe-guardians/issues) or contact the project maintainers.
 
