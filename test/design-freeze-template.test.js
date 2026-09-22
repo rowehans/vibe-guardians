@@ -89,14 +89,30 @@ const runTemplate = ({ config, files = {} }) => {
   fs.rmSync(dir, { recursive: true, force: true });
 
   const output = `${result.stdout}${result.stderr}`;
-  const summary = {
-    tests: Number(output.match(/^ℹ tests (\d+)/m)?.[1] ?? -1),
-    pass: Number(output.match(/^ℹ pass (\d+)/m)?.[1] ?? -1),
-    fail: Number(output.match(/^ℹ fail (\d+)/m)?.[1] ?? -1),
-  };
+
+  /**
+   * The runner reports in two different formats — the spec reporter (ℹ tests N)
+   * on a terminal and TAP ("ok N - name") when stdout is a pipe, which is what
+   * CI gets. Reading only one of them made this harness call a perfectly healthy
+   * child "mute" on Linux; both are read so the verdict cannot depend on how the
+   * output happens to be captured.
+   */
+  const count = (pattern) => (output.match(pattern) ?? []).length;
+  const specTests = output.match(/^ℹ tests (\d+)/m);
+  const summary = specTests
+    ? {
+        tests: Number(specTests[1]),
+        pass: Number(output.match(/^ℹ pass (\d+)/m)?.[1] ?? -1),
+        fail: Number(output.match(/^ℹ fail (\d+)/m)?.[1] ?? -1),
+      }
+    : {
+        tests: count(/^\s*(?:not )?ok \d+ - /gm),
+        pass: count(/^\s*ok \d+ - /gm),
+        fail: count(/^\s*not ok \d+ - /gm),
+      };
   assert.ok(
     summary.tests > 0,
-    `FAIL-CLOSED: the spawned runner reported no tests (status ${result.status}), so its result means nothing — a leaked NODE_TEST_CONTEXT does exactly this.\n${output}`
+    `FAIL-CLOSED: the spawned runner reported no tests (status ${result.status}), so its result means nothing — a leaked NODE_TEST_CONTEXT makes a child exit 0 without running anything.\n${output}`
   );
   return { status: result.status, output, summary };
 };
