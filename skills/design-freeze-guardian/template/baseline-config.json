@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "lastUpdated": "2026-09-21T00:00:00.000Z",
+  "lastUpdated": "2026-09-22T00:00:00.000Z",
   "designTokens": {
-    "file": "src/styles/theme.css",
-    "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    "file": "theme.sample.css",
+    "expectedSha256": "118bca8f3c4da0a0924c78ee84ccf06365f281d6771729afeb6dd3845dd62b45"
   },
   "criticalCopy": {
     "loginButton": "Sign In",
@@ -13,9 +13,9 @@
   "authorizedExceptions": [
     {
       "taskId": "INIT-001",
-      "authorizedBy": "lead@example.com",
-      "approvedQuote": "Initial design baseline baseline freeze initialized",
-      "approvedAt": "2026-09-21T00:00:00.000Z"
+      "authorizedBy": "your github handle or team name",
+      "approvedQuote": "Initial design freeze baseline captured from the approved build before any assistant touched the UI.",
+      "approvedAt": "2026-09-22T00:00:00.000Z"
     }
   ]
 }

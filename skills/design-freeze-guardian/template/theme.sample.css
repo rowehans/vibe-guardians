@@ -1,0 +1,27 @@
+/* ============================================================================
+   theme.sample.css — a stand-in design token file for the design freeze template.
+   Replace it with your real token file (CSS custom properties, Tailwind theme
+   output, a tokens JSON dumped to CSS, …) and re-point designTokens.file at it.
+   ============================================================================ */
+
+:root {
+  /* surfaces */
+  --color-bg: #0b1020;
+  --color-surface: #141a33;
+  --color-surface-alt: #1b1035;
+
+  /* brand accents */
+  --color-accent: #7c5cff;
+  --color-accent-soft: #4aa8ff;
+  --color-success: #2ee6a8;
+
+  /* type */
+  --color-text: #ffffff;
+  --color-text-muted: #9fb4d8;
+  --font-family-base: "Segoe UI", system-ui, sans-serif;
+
+  /* geometry */
+  --radius-md: 12px;
+  --radius-pill: 999px;
+  --space-4: 16px;
+}
