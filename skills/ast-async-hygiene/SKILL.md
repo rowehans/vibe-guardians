@@ -1,6 +1,6 @@
 ---
 name: ast-async-hygiene
-description: Static AST linting to prevent AI assistants from writing unawaited floating promises in database/network calls and swallowing runtime exceptions with empty catch blocks.
+description: Catch AI-generated async defects before they ship. Static AST analysis flags floating promises on database and network mutations (a missing await) and empty catch blocks that swallow exceptions, so silent data loss fails the build. Use when generating or reviewing JavaScript/TypeScript that writes to storage or calls an API.
 ---
 
 # AST Async Hygiene Protocol

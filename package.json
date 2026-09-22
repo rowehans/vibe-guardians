@@ -1,29 +1,62 @@
 {
   "name": "vibe-guardians",
   "version": "1.0.0",
-  "description": "Universal anti-regression guardians, design freeze test suites, and multi-agent coordination protocols for AI coding assistants",
+  "description": "Anti-regression guardians for AI coding assistants: multi-agent file locking, design freeze, and async hygiene test suites. Agent-agnostic, zero runtime dependencies, AGENTS.md ready.",
   "type": "module",
   "main": "skills/agent-coordinator/scripts/agent-coord.mjs",
   "bin": {
     "agent-coord": "skills/agent-coordinator/scripts/agent-coord.mjs"
   },
+  "files": [
+    "skills",
+    "rules",
+    "test",
+    "AGENTS.md",
+    "llms.txt",
+    "CLAUDE.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "CODE_OF_CONDUCT.md"
+  ],
   "scripts": {
     "test": "node --test test/*.test.js"
   },
   "keywords": [
-    "ai",
-    "vibe-coding",
-    "cursor",
-    "claude-code",
-    "antigravity",
-    "windsurf",
-    "design-freeze",
+    "ai-agents",
+    "ai-coding-assistant",
+    "agent-skills",
+    "agents-md",
+    "llms-txt",
     "multi-agent",
+    "agent-coordination",
+    "file-lock",
+    "design-freeze",
+    "regression-guard",
+    "anti-regression",
     "code-hygiene",
-    "guardians"
+    "floating-promises",
+    "fail-closed",
+    "vibe-coding",
+    "claude-code",
+    "cursor",
+    "codex",
+    "github-copilot",
+    "windsurf"
   ],
   "author": "Vibe Guardians Open Community",
   "license": "PolyForm-Noncommercial-1.0.0",
+  "homepage": "https://github.com/rowehans/vibe-guardians#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rowehans/vibe-guardians.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rowehans/vibe-guardians/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "acorn": "^8.14.0",
     "acorn-walk": "^8.3.4"

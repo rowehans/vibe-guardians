@@ -1,0 +1,62 @@
+name: 🛡️ Propose a guardian
+description: Suggest a new invariant worth turning into a failing test
+title: "[guardian] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A guardian is a *failure mode* turned into a check. The strongest proposals name the exact mistake an assistant makes, show what it costs, and explain how a test can detect it without reading the author's mind.
+
+  - type: input
+    id: failure-mode
+    attributes:
+      label: The failure mode, in one sentence
+      description: "Example: the assistant rewrites error messages while fixing an unrelated bug."
+      placeholder: The assistant ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence it actually happens
+      description: A real diff, incident or reproducible prompt. Concrete beats hypothetical.
+    validations:
+      required: true
+
+  - type: textarea
+    id: detection
+    attributes:
+      label: How could a test detect it deterministically?
+      description: What would you hash, parse, diff or assert? Must be reproducible and free of timestamps or environment noise.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: shape
+    attributes:
+      label: Where would it live?
+      options:
+        - A new skill (protocol + test template)
+        - An added rule under rules/
+        - An extra case in an existing skill
+        - A check in this repository's own test suite
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What have you tried instead, and why is it not enough?
+      description: Why can't a prompt, a code review, or an existing lint rule cover this?
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This can be checked with Node builtins (no new runtime dependencies)
+          required: true
+        - label: This fails closed — an unverifiable run would fail rather than skip
+          required: true

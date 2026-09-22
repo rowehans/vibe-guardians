@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="Vibe Guardians social preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0e1c"/>
+      <stop offset="0.5" stop-color="#131a33"/>
+      <stop offset="1" stop-color="#1d1140"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c5cff"/>
+      <stop offset="0.5" stop-color="#4aa8ff"/>
+      <stop offset="1" stop-color="#2ee6a8"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8b6bff"/>
+      <stop offset="1" stop-color="#3f7dff"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <g fill="url(#accent)">
+    <circle cx="1080" cy="120" r="220" opacity="0.16"/>
+    <circle cx="150" cy="560" r="180" opacity="0.10"/>
+  </g>
+  <rect x="0" y="0" width="1280" height="8" fill="url(#accent)"/>
+
+  <g transform="translate(120 96)">
+    <path d="M60 0 118 22v51c0 39-24 71-58 87-34-16-58-48-58-87V22Z" fill="url(#shield)"/>
+    <path d="M36 71 54 90 88 50" fill="none" stroke="#0a0e1c" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="120" y="320" font-family="Segoe UI, -apple-system, Inter, Helvetica, Arial, sans-serif" font-size="96" font-weight="700" fill="#ffffff">Vibe Guardians</text>
+  <text x="124" y="386" font-family="Segoe UI, -apple-system, Inter, Helvetica, Arial, sans-serif" font-size="38" fill="#a9bde0">Anti-regression guardians for AI coding assistants</text>
+
+  <g font-family="Segoe UI, -apple-system, Inter, Helvetica, Arial, sans-serif" font-size="28" font-weight="600">
+    <rect x="124" y="428" width="248" height="58" rx="29" fill="#7c5cff" opacity="0.20" stroke="#7c5cff" stroke-opacity="0.65"/>
+    <text x="158" y="466" fill="#c9c0ff">Design freeze</text>
+
+    <rect x="392" y="428" width="300" height="58" rx="29" fill="#4aa8ff" opacity="0.20" stroke="#4aa8ff" stroke-opacity="0.65"/>
+    <text x="426" y="466" fill="#bcdcff">Agent coordination</text>
+
+    <rect x="712" y="428" width="266" height="58" rx="29" fill="#2ee6a8" opacity="0.20" stroke="#2ee6a8" stroke-opacity="0.65"/>
+    <text x="746" y="466" fill="#b6f2df">Async hygiene</text>
+  </g>
+
+  <text x="124" y="546" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="30" fill="#93a7ca">npx skills add rowehans/vibe-guardians</text>
+
+  <text x="124" y="600" font-family="Segoe UI, -apple-system, Inter, Helvetica, Arial, sans-serif" font-size="24" fill="#7f8fb0">AGENTS.md ready · llms.txt available · PolyForm Noncommercial 1.0.0 · Node 18+</text>
+</svg>

@@ -1,6 +1,6 @@
 ---
 name: design-freeze-guardian
-description: Prevents unprompted visual regressions, color palette drift, padding adjustments, and unauthorized copy changes caused by AI coding assistants during refactors and bug fixes.
+description: Stop AI assistants from silently redesigning your app. Freeze design tokens, color palettes, typography, spacing and critical UI copy in a fail-closed test suite, so a visual or copy change fails unless an authorized baseline entry allows it. Use during refactors and bug fixes with any assistant (Cursor, Claude Code, Codex, Copilot, Windsurf, Antigravity).
 ---
 
 # Design Freeze Guardian Protocol

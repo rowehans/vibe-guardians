@@ -1,0 +1,78 @@
+name: 🐞 Bug report
+description: A guardian failed, skipped, or passed when it should have failed
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. A guardian that passes while its invariant is violated is the most serious bug this project can have — please be precise about which one you hit.
+
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Which part?
+      options:
+        - agent-coordinator
+        - design-freeze-guardian
+        - ast-async-hygiene
+        - license-integrity guard
+        - CI / packaging
+        - documentation
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: failure
+    attributes:
+      label: How did it fail?
+      description: False pass and silent skip are treated as high severity.
+      options:
+        - "False pass — the check passed while the invariant was broken"
+        - "Silent skip — the check never ran"
+        - "False failure — the check failed on valid input"
+        - "Unusable diagnostic — it failed but the message did not say why"
+        - "Crash / unexpected error"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact command and output
+      description: Paste the command you ran and the **complete** real output. Do not summarise it.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect, and why?
+      description: Include the smallest input that still shows the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      value: |
+        - OS:
+        - Node version (`node --version`):
+        - Install method (`npx skills add` / copied template / cloned repo):
+        - Agent and version (Cursor, Claude Code, Codex, Copilot, …):
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed private data (credentials, customer names, personal paths) from the output I pasted
+          required: true
+        - label: I searched existing issues for the same problem
+          required: true

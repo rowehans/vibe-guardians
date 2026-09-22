@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security issue privately
+    url: https://github.com/rowehans/vibe-guardians/security/advisories/new
+    about: A guard that can be bypassed, data leakage in the package, or locking issues — please report these privately, not in a public issue.
+  - name: 📖 Read the agent conventions
+    url: https://github.com/rowehans/vibe-guardians/blob/main/AGENTS.md
+    about: Build/test commands, conventions and the non-negotiable rules for working in this repository.
+  - name: 💼 Commercial licensing
+    url: https://github.com/rowehans/vibe-guardians/blob/main/README.md#-license--terms-of-use-t%C3%A9rminos-de-uso
+    about: This project is PolyForm Noncommercial 1.0.0. Companies need a commercial license before using it at work.

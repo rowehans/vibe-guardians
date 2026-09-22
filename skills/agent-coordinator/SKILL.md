@@ -1,6 +1,6 @@
 ---
 name: agent-coordinator
-description: Multi-Agent coordination and file-lock protocol for preventing collisions when multiple AI coding assistants work concurrently in the same repository.
+description: Stop concurrent AI agents from colliding in one repository. Atomic file-scope locks, task leases, a coordination board and evidence-gated task closure, with zero dependencies. Use when running several agents or subagents, parallel worktrees, or any fan-out where two writers can touch the same file (Cursor, Claude Code, Codex, Copilot, Windsurf, Antigravity).
 ---
 
 # Agent Coordinator Protocol

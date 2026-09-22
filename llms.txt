@@ -1,0 +1,31 @@
+# Vibe Guardians
+
+> Zero-dependency anti-regression guardians for AI coding assistants: a multi-agent file-lock protocol, a design-freeze test suite, and an AST hygiene linter — plain Node, native test runner, no build step.
+
+Vibe Guardians is a package of three **agent skills** that encode invariants AI assistants routinely break: unprompted visual/copy drift during refactors, two agents editing the same file at once, and async defects (`await` omitted before a mutation) or empty `catch` blocks that swallow failures. Each skill is a `SKILL.md` protocol plus an executable test template, so the invariant is enforced by a failing test rather than by a polite request in a prompt.
+
+Install path for agents: `npx skills add rowehans/vibe-guardians` (per-skill flags documented in the README). The package is ESM, requires Node 18+, and its only dependencies are `acorn` and `acorn-walk`, used exclusively by the AST analyzer — the coordinator CLI and both other test templates use Node builtins only.
+
+Everything here is **fail-closed by design**: a guard that cannot verify its subject fails instead of skipping, and failures report file, line, cause and remedy.
+
+## Skills
+
+- [agent-coordinator](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/skills/agent-coordinator/SKILL.md): file-lock and task-lease protocol so concurrent agents never collide; includes a coordination board, scope guard and evidence-gated closure.
+- [design-freeze-guardian](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/skills/design-freeze-guardian/SKILL.md): hashes design tokens, palettes and critical UI copy so visual or copy drift fails a test unless an authorized baseline entry allows it.
+- [ast-async-hygiene](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/skills/ast-async-hygiene/SKILL.md): static AST checks for floating promises on database/network mutations and empty `catch` blocks that hide runtime errors.
+
+## Reference rules
+
+- [rules/fail-closed-builds.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/fail-closed-builds.md): why a check that cannot run must fail the build, and how to write such a check.
+- [rules/anti-overfitting.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/anti-overfitting.md): how to keep tests meaningful instead of tuned to pass.
+
+## Working in this repository
+
+- [AGENTS.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/AGENTS.md): build/test commands, conventions and the non-negotiable rules for agents changing this repo.
+- [README.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/README.md): human-facing overview, install commands and licensing summary.
+- [CONTRIBUTING.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/CONTRIBUTING.md): how to propose a skill or a fix, and what "done" means here.
+
+## Optional
+
+- [test/license-integrity.test.js](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/test/license-integrity.test.js): the fail-closed guard that pins `LICENSE` to the canonical PolyForm Noncommercial 1.0.0 text.
+- [LICENSE](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/LICENSE): PolyForm Noncommercial 1.0.0; commercial use requires a license from the maintainers.
