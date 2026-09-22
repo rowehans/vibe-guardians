@@ -10,7 +10,12 @@
   "files": [
     "skills",
     "rules",
-    "test",
+    "test/agent-coord.test.js",
+    "test/code-hygiene.test.js",
+    "test/design-freeze-template.test.js",
+    "test/discovery-surface.test.js",
+    "test/license-integrity.test.js",
+    "test/fixtures",
     "AGENTS.md",
     "llms.txt",
     "CLAUDE.md",

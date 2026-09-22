@@ -173,13 +173,39 @@ test("DS-4: package.json exposes the metadata that makes the package findable", 
 
   const files = pkg.files ?? [];
   assert.ok(files.length >= 5, "use an explicit files allowlist so publishing is deterministic");
-  for (const required of ["skills", "rules", "test"]) {
+  for (const required of ["skills", "rules"]) {
     assert.ok(files.includes(required), `the files allowlist must keep shipping ${required}/`);
   }
   assert.ok(
     !files.some((entry) => entry.startsWith(".") || entry.includes("node_modules")),
     "never ship dot-directories or node_modules"
   );
+
+  // The published suite must be complete (a consumer can run everything we ship)
+  // and self-sufficient (nothing that depends on repository-only files travels).
+  const suites = fs
+    .readdirSync(path.join(ROOT, "test"), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".test.js"))
+    .map((entry) => `test/${entry.name}`);
+  const repoOnlySuites = suites.filter((rel) => path.basename(rel).startsWith("repo."));
+  const missing = suites.filter((rel) => !repoOnlySuites.includes(rel) && !files.includes(rel));
+  assert.deepEqual(missing, [], `these suites ship with the package but are missing from the files allowlist: ${missing.join(", ")}`);
+
+  // The publish boundary only exists in a repository checkout: an installed
+  // package has no repository-only suites to reason about, and demanding them
+  // there would fail on files that were never supposed to ship.
+  if (isRepositoryCheckout()) {
+    assert.ok(
+      repoOnlySuites.length >= 1,
+      "this repository's own suites must be named test/repo.*.test.js: the naming convention is what keeps the published surface derivable instead of hand-maintained"
+    );
+    const mustNotShip = [...repoOnlySuites, "baseline-config.json"].filter((rel) => files.includes(rel));
+    assert.deepEqual(
+      mustNotShip,
+      [],
+      `${mustNotShip.join(", ")} freezes this repository's own assets and must not be published: a consumer would fail on files they never received`
+    );
+  }
 });
 
 test("DS-5: every public URL agrees on one repository slug", () => {

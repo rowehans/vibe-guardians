@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "lastUpdated": "2026-09-22T00:16:16.000Z",
+  "designTokens": {
+    "files": [
+      ".github/banner.svg",
+      ".github/social-preview.svg"
+    ],
+    "palette": {
+      "ink900": "#0b1020",
+      "ink800": "#141a33",
+      "ink700": "#1b1035",
+      "accentViolet": "#7c5cff",
+      "accentBlue": "#4aa8ff",
+      "accentMint": "#2ee6a8",
+      "shieldTop": "#8b6bff",
+      "shieldBottom": "#3f7dff",
+      "textPrimary": "#ffffff",
+      "textMuted": "#9fb4d8",
+      "textMono": "#8fa3c8",
+      "textFooter": "#7f8fb0",
+      "pillViolet": "#c9c0ff",
+      "pillBlue": "#bcdcff",
+      "pillMint": "#b6f2df"
+    },
+    "gradients": {
+      "bg": ["ink900", "ink800", "ink700"],
+      "accent": ["accentViolet", "accentBlue", "accentMint"],
+      "shield": ["shieldTop", "shieldBottom"]
+    },
+    "renders": [
+      {
+        "svg": ".github/banner.svg",
+        "png": ".github/banner.png",
+        "width": 1280,
+        "height": 340
+      },
+      {
+        "svg": ".github/social-preview.svg",
+        "png": ".github/social-preview.png",
+        "width": 1280,
+        "height": 640
+      }
+    ]
+  },
+  "criticalCopy": {
+    "projectName": {
+      "text": "Vibe Guardians",
+      "in": [".github/banner.svg", ".github/social-preview.svg", "README.md", "llms.txt"]
+    },
+    "tagline": {
+      "text": "Anti-regression guardians for AI coding assistants",
+      "in": [".github/banner.svg", ".github/social-preview.svg", "README.md"]
+    },
+    "installCommand": {
+      "text": "npx skills add rowehans/vibe-guardians",
+      "in": [".github/banner.svg", ".github/social-preview.svg", "README.md", "llms.txt"]
+    },
+    "licenseName": {
+      "text": "PolyForm Noncommercial License 1.0.0",
+      "in": ["README.md", "LICENSE"]
+    }
+  },
+  "authorizedExceptions": [
+    {
+      "taskId": "DF-DOGFOOD-01",
+      "authorizedBy": "Vibe Guardians Open Community",
+      "approvedQuote": "Unify the README banner and the social preview onto a single brand palette and freeze it as the initial visual baseline of this repository.",
+      "approvedAt": "2026-09-22T00:16:16.000Z"
+    }
+  ]
+}

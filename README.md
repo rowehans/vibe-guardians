@@ -79,6 +79,8 @@ rules/
 
 **Fail-closed by default.** A guardian that cannot verify its subject fails instead of skipping, and its message names the file, the line, the cause and the remedy — never just `expected true, got false`.
 
+**This repository runs its own guardians on itself.** Its banner, social preview, gradients, critical copy and rendered image sizes are frozen by `design-freeze-guardian`; its license is pinned to the canonical PolyForm text; its discovery surface is checked in eight ways. All of it runs in `npm test`, on every push — the README you are reading is a guarded asset, not a description of one.
+
 ---
 
 ## Works with
