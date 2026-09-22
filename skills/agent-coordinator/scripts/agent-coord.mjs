@@ -13,6 +13,11 @@
  */
 
 import process from "node:process";
+import fs from "node:fs";
+import net from "node:net";
+import path from "node:path";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { createCoordinator } from "./coord-core.mjs";
 
 const coord = createCoordinator(process.cwd());
@@ -22,6 +27,57 @@ const YELLOW = "\x1b[33m";
 const RED = "\x1b[31m";
 const CYAN = "\x1b[36m";
 const RESET = "\x1b[0m";
+
+const WORKBOARD_HOST = "127.0.0.1";
+const WORKBOARD_PORT = 4319;
+const WORKBOARD_SERVER = path.join("scripts", "workboard-serve.mjs");
+const WORKBOARD_PROBE_TIMEOUT_MS = 250;
+
+/** Probe a local TCP port without making the coordinator depend on the board. */
+export function probeWorkboardPort({ host = WORKBOARD_HOST, port = WORKBOARD_PORT, timeoutMs = WORKBOARD_PROBE_TIMEOUT_MS } = {}) {
+  return new Promise((resolve) => {
+    const socket = net.createConnection({ host, port });
+    let settled = false;
+    const finish = (open) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(open);
+    };
+    socket.once("connect", () => finish(true));
+    socket.once("error", () => finish(false));
+    socket.setTimeout(timeoutMs, () => finish(false));
+  });
+}
+
+/**
+ * Keep an optional consumer workboard alive whenever an agent uses this CLI.
+ * Repositories without scripts/workboard-serve.mjs are unaffected.
+ */
+export async function ensureWorkboardLive({
+  cwd = process.cwd(),
+  host = WORKBOARD_HOST,
+  port = WORKBOARD_PORT,
+  probe = probeWorkboardPort,
+  spawnProcess = spawn,
+} = {}) {
+  const serverPath = path.join(cwd, WORKBOARD_SERVER);
+  if (!fs.existsSync(serverPath)) return { available: false, started: false };
+  if (await probe({ host, port })) return { available: true, started: false };
+
+  try {
+    const child = spawnProcess(process.execPath, [serverPath, "--port", String(port)], {
+      cwd,
+      detached: true,
+      stdio: "ignore",
+      windowsHide: process.platform === "win32",
+    });
+    if (child && typeof child.unref === "function") child.unref();
+    return { available: true, started: true };
+  } catch (error) {
+    return { available: true, started: false, error: error.message };
+  }
+}
 
 function parseArgs(args) {
   const result = { _: [] };
@@ -192,22 +248,29 @@ the above as tool calls instead of reading these instructions.
 `);
 }
 
-const argv = process.argv.slice(2);
-const command = argv[0];
-const parsed = parseArgs(argv.slice(1));
+export async function runCli(argv = process.argv.slice(2)) {
+  await ensureWorkboardLive();
+  const command = argv[0];
+  const parsed = parseArgs(argv.slice(1));
 
-switch (command) {
-  case "status": cmdStatus(); break;
-  case "guard": cmdGuard(parsed); break;
-  case "claim": cmdClaim(parsed); break;
-  case "finish": cmdFinish(parsed); break;
-  case "release": cmdRelease(parsed); break;
-  case "audit": cmdAudit(); break;
-  case "board": cmdBoard(parsed); break;
-  case "help":
-  case "--help":
-  case "-h":
-  default:
-    cmdHelp();
-    break;
+  switch (command) {
+    case "status": cmdStatus(); break;
+    case "guard": cmdGuard(parsed); break;
+    case "claim": cmdClaim(parsed); break;
+    case "finish": cmdFinish(parsed); break;
+    case "release": cmdRelease(parsed); break;
+    case "audit": cmdAudit(); break;
+    case "board": cmdBoard(parsed); break;
+    case "help":
+    case "--help":
+    case "-h":
+    default:
+      cmdHelp();
+      break;
+  }
 }
+
+const invokedDirectly = process.argv[1]
+  && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (invokedDirectly) await runCli();
