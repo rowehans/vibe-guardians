@@ -8,7 +8,10 @@
  *   node --test test/design-freeze.test.js
  *
  * SETUP
- *   1. Copy this file to your test/ directory.
+ *   1. Copy this file to your test/ directory. It is an ES module, so your
+ *      project must declare "type": "module" in package.json — or keep the file
+ *      as .mjs and point the command below at it. Node 18 does not detect module
+ *      syntax, so without either one the runner cannot load this file at all.
  *   2. Copy baseline-config.json to your project root.
  *   3. Copy theme.sample.css next to it, or replace designTokens.file with your
  *      real token file and re-hash it:

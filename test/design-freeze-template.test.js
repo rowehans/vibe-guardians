@@ -75,6 +75,14 @@ const runTemplate = ({ config, files = {} }) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "df-template-"));
   fs.mkdirSync(path.join(dir, "test"));
   fs.copyFileSync(path.join(ROOT, TEMPLATE_REL), path.join(dir, "test", "design-freeze.test.js"));
+  // The template is an ES module. Node 18 does not detect module syntax, so a
+  // project that never declares its module system cannot load it at all — which
+  // is how this scaffold, not the template, turned CI red on Node 18 while 20 and
+  // 22 (which auto-detect) stayed green. Declaring it is part of the setup.
+  fs.writeFileSync(
+    path.join(dir, "package.json"),
+    `${JSON.stringify({ name: "df-template-fixture", private: true, type: "module" }, null, 2)}\n`
+  );
   if (config !== undefined) {
     fs.writeFileSync(path.join(dir, "baseline-config.json"), typeof config === "string" ? config : JSON.stringify(config, null, 2));
   }
