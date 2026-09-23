@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { ensureWorkboardLive } from "../skills/agent-coordinator/scripts/agent-coord.mjs";
+import { createCoordinator } from "../skills/agent-coordinator/scripts/coord-core.mjs";
 
 const ROOT = process.cwd();
 const CLI = path.join(ROOT, "skills", "agent-coordinator", "scripts", "agent-coord.mjs");
@@ -33,11 +34,45 @@ test("COORD-3: claim, guard collision detection, and finish lifecycle", () => {
   assert.ok(guardPass.includes("[GUARD PASS]"));
 
   // Finish task
-  execFileSync("node", [CLI, "finish", "--id", "TEST-TASK-01", "--agent", "AgentA"]);
+  execFileSync("node", [CLI, "finish", "--id", "TEST-TASK-01", "--agent", "AgentA", "--result", "Claim and guard behavior verified", "--reason", "Complete the lifecycle test"]);
 
   // After finish, guard should now pass on original file
   const guardAfter = execFileSync("node", [CLI, "guard", "--agent", "AgentB", "--scope", "src/sample.js"], { encoding: "utf8" });
   assert.ok(guardAfter.includes("[GUARD PASS]"));
+});
+
+test("COORD-4: task closure requires a result and reason", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "vibe-guardians-finish-"));
+  try {
+    assert.throws(() => execFileSync("node", [CLI, "finish", "--id", "TASK-MISSING", "--agent", "AgentA", "--reason", "Why"], {
+      cwd: root, encoding: "utf8", stdio: "pipe",
+    }), (error) => error.status === 1 && String(error.stderr).includes("--result is required"));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("COORD-5: review appends reviewer evidence without replacing task authorship", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "vibe-guardians-review-"));
+  try {
+    const coord = createCoordinator(root);
+    coord.claim({ id: "TASK-REVIEW", agent: "OriginalAgent", scope: "src/a.js", create: true, title: "Original title" });
+    coord.finish({ id: "TASK-REVIEW", agent: "OriginalAgent", result: "Implemented tests", reason: "Prevent regressions" });
+    const reviewed = coord.review({ id: "TASK-REVIEW", reviewer: "ReviewerAgent", summary: "Verified behavior", reason: "Tests and audit passed" });
+    const task = coord.board().tasks.find((item) => item.id === "TASK-REVIEW");
+    assert.equal(reviewed.ok, true);
+    assert.equal(task.createdBy, "OriginalAgent");
+    assert.equal(task.closedBy, "OriginalAgent");
+    assert.equal(task.title, "Original title");
+    assert.equal(task.reviews[0].reviewedBy, "ReviewerAgent");
+    assert.equal(task.reviews[0].summary, "Verified behavior");
+    assert.equal(task.reviews[0].reason, "Tests and audit passed");
+    const output = execFileSync("node", [CLI, "review", "--id", "TASK-REVIEW", "--reviewer", "SecondReviewer", "--summary", "Checked the generated board", "--reason", "Confirm attribution remains intact"], { cwd: root, encoding: "utf8" });
+    assert.match(output, /reviewed by 'SecondReviewer'/);
+    assert.match(execFileSync("node", [CLI, "board"], { cwd: root, encoding: "utf8" }), /Reviewed by SecondReviewer/);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("WORKBOARD-1: repositories without a workboard remain unaffected", async () => {

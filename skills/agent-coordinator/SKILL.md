@@ -24,8 +24,14 @@ Use this skill when collaborating with other AI agents or developers in the same
 4. **Release or Finish Upon Completion**:
    - If work is finished and verified:
      ```bash
-     node skills/agent-coordinator/scripts/agent-coord.mjs finish --id <TASK-ID> --agent <YourAgentName> --result "Verified passing unit tests"
+     node skills/agent-coordinator/scripts/agent-coord.mjs finish --id <TASK-ID> --agent <YourAgentName> --result "What changed; tests that passed" --reason "Why the work was needed"
      ```
+   - Every closure must summarize what was done and why; report failed checks and corrections in `--result`.
+   - To review a completed task, append a separately attributed record:
+     ```bash
+     node skills/agent-coordinator/scripts/agent-coord.mjs review --id <TASK-ID> --reviewer <ReviewerName> --summary "What was checked" --reason "Why the outcome is accepted"
+     ```
+   - Reviews never replace the original creator, closer or closure details. Historical tasks without a review record remain unreviewed.
    - If you need to stop or unblock others:
      ```bash
      node skills/agent-coordinator/scripts/agent-coord.mjs release --id <TASK-ID> --agent <YourAgentName>

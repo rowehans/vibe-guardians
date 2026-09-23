@@ -166,8 +166,25 @@ function cmdFinish(opts) {
     console.error("Error: --id is required.");
     process.exit(1);
   }
-  coord.finish({ id: opts.id, agent: opts.agent, result: opts.result || "Finished" });
+  if (!opts.result) {
+    console.error("Error: --result is required; summarize what was done.");
+    process.exit(1);
+  }
+  if (!opts.reason) {
+    console.error("Error: --reason is required; explain why the work was done.");
+    process.exit(1);
+  }
+  coord.finish({ id: opts.id, agent: opts.agent, result: opts.result, reason: opts.reason });
   console.log(`${GREEN}[FINISH]${RESET} Task '${opts.id}' marked as done and claim released.`);
+}
+
+function cmdReview(opts) {
+  if (!opts.id) {
+    console.error("Error: --id is required.");
+    process.exit(1);
+  }
+  const reviewed = coord.review({ id: opts.id, reviewer: opts.reviewer || opts.agent, summary: opts.summary, reason: opts.reason });
+  console.log(`${GREEN}[REVIEW]${RESET} Task '${opts.id}' reviewed by '${reviewed.review.reviewedBy}'.`);
 }
 
 function cmdRelease(opts) {
@@ -211,6 +228,9 @@ function cmdBoard(opts) {
       const lease = board.claims.find((claim) => claim.taskId === task.id);
       const holder = lease ? ` -> ${lease.agent}` : "";
       console.log(`  ${task.priority || "P2"}  ${task.id}  ${task.title || ""}${holder}`);
+      for (const review of task.reviews || []) {
+        console.log(`    Reviewed by ${review.reviewedBy}: ${review.summary}. Reason: ${review.reason}`);
+      }
     }
     console.log("");
   }
@@ -232,7 +252,10 @@ Commands:
              node agent-coord.mjs claim --create --id TASK-102 --title "New feature" --agent Antigravity --scope src/
 
   finish     Mark task as completed, archive evidence and release file lock
-             node agent-coord.mjs finish --id TASK-101 --agent ClaudeCode --result "All tests pass"
+             node agent-coord.mjs finish --id TASK-101 --agent ClaudeCode --result "What changed and verification" --reason "Why the work was needed"
+
+  review     Record a review of a completed task without replacing its author or closure details
+             node agent-coord.mjs review --id TASK-101 --reviewer Reviewer --summary "What was checked" --reason "Why it passes"
 
   release    Release task lease without marking it completed
              node agent-coord.mjs release --id TASK-101 --agent ClaudeCode
@@ -258,6 +281,7 @@ export async function runCli(argv = process.argv.slice(2)) {
     case "guard": cmdGuard(parsed); break;
     case "claim": cmdClaim(parsed); break;
     case "finish": cmdFinish(parsed); break;
+    case "review": cmdReview(parsed); break;
     case "release": cmdRelease(parsed); break;
     case "audit": cmdAudit(); break;
     case "board": cmdBoard(parsed); break;

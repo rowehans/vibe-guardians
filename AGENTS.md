@@ -57,6 +57,13 @@ Before you report a task as complete:
 - New skills ship frontmatter, a `README.md` and templates; new behavior ships a test that fails without the change.
 - The working tree contains only intended files — no debug leftovers, no generated tarballs.
 
+## Task closure and review records
+
+- Every task completed through `agent-coord finish` must include `--result` with a concise summary of what changed and what verification was run, plus `--reason` explaining why the work was necessary. If something failed and was corrected, say so in the result.
+- A separate reviewer records a completed-task review with `agent-coord review --id ... --reviewer ... --summary ... --reason ...`. The board labels each review with its reviewer and retains the original creator, closer, title, result, reason, and all earlier reviews.
+- Never rewrite original task authorship or closure details to make a review appear to have done the implementation. Historical tasks without review records are unreviewed; do not infer otherwise.
+- This rule applies to every agent, task and project in this repository.
+
 ## Security and licensing
 
 The package is distributed under **PolyForm Noncommercial 1.0.0**: noncommercial use is free, commercial use requires a license from the maintainers. Do not add code, copy or dependencies that would conflict with that, and do not relicense any file. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).

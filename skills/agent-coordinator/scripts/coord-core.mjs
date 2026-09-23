@@ -215,8 +215,10 @@ export function createCoordinator(root) {
     },
 
     /** Close a task, archiving the claim as history and releasing its scope. */
-    finish({ id, agent, result = "Finished" }) {
+    finish({ id, agent, result, reason }) {
       if (!id) throw new Error("--id is required.");
+      if (!String(result ?? "").trim()) throw new Error("--result is required and must summarize what was done.");
+      if (!String(reason ?? "").trim()) throw new Error("--reason is required and must explain why the work was done.");
       return withLock(() => {
         const claimFile = path.join(claimsDir, `${id}.json`);
         const archived = fs.existsSync(claimFile);
@@ -226,6 +228,7 @@ export function createCoordinator(root) {
             ...claim,
             finishedAt: new Date().toISOString(),
             result,
+            reason,
           });
           fs.unlinkSync(claimFile);
         }
@@ -234,10 +237,29 @@ export function createCoordinator(root) {
         if (task) {
           task.status = "done";
           task.closedAt = new Date().toISOString();
+          task.result = result;
+          task.reason = reason;
           if (agent) task.closedBy = agent;
           writeJsonAtomic(tasksFile, tasks);
         }
-        return { ok: true, id, archived, closed: Boolean(task), result };
+        return { ok: true, id, archived, closed: Boolean(task), result, reason };
+      });
+    },
+
+    /** Append an independent review record without overwriting the task's author or closure evidence. */
+    review({ id, reviewer, summary, reason }) {
+      if (!id) throw new Error("--id is required.");
+      if (!String(reviewer ?? "").trim()) throw new Error("--reviewer is required.");
+      if (!String(summary ?? "").trim()) throw new Error("--summary is required and must state what was reviewed.");
+      if (!String(reason ?? "").trim()) throw new Error("--reason is required and must explain the review outcome.");
+      return withLock(() => {
+        const tasks = readTasks();
+        const task = tasks.find((item) => item.id === id);
+        if (!task || task.status !== "done") throw new Error(`Task '${id}' must exist and be done before it can be reviewed.`);
+        const review = { reviewedBy: reviewer, reviewedAt: new Date().toISOString(), summary, reason };
+        task.reviews = Array.isArray(task.reviews) ? [...task.reviews, review] : [review];
+        writeJsonAtomic(tasksFile, tasks);
+        return { ok: true, id, review };
       });
     },
 
