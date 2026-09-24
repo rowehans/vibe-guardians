@@ -75,6 +75,12 @@ skills/
 rules/
   fail-closed-builds.md     why an unverifiable check must fail the build
   anti-overfitting.md       how to keep a test meaningful instead of tuned
+  continuous-task-pipeline.md continuous intake and non-stagnant backlog progress
+  dirty-worktree-isolation.md zero builds or deploys over uncommitted in-flight changes
+  empirical-flow-verification.md terminal proof before assertions, evidence before completion
+  multi-agent-anti-deadlock.md non-colliding task selection and workspace serialization
+  strict-modularity.md      single responsibility, isolated domain modules
+  user-halt-protocol.md     immediate freeze and graceful finish when user requests halt
 ```
 
 **Fail-closed by default.** A guardian that cannot verify its subject fails instead of skipping, and its message names the file, the line, the cause and the remedy — never just `expected true, got false`.

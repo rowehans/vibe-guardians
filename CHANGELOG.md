@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- **Multi-agent & operational workflow rules** — added six core engineering protocols in `rules/`:
+  - `continuous-task-pipeline.md`: autonomous task intake, auto-chaining, and anti-idleness on shared workboards.
+  - `dirty-worktree-isolation.md`: forbids compiling bundles or deploying over uncommitted in-flight changes.
+  - `empirical-flow-verification.md`: mandates terminal command verification and empirical proof before claiming success.
+  - `multi-agent-anti-deadlock.md`: anti-collision task selection, single-workspace serialization, and active lease grace periods.
+  - `strict-modularity.md`: enforces deep modules, single source of truth, and separation of UI components from domain math.
+  - `user-halt-protocol.md`: immediate freeze and graceful drain when a human operator halts the development run.
+- **Discovery surface indexing** — updated `llms.txt` and `README.md` to reference the expanded rule catalog.
+
 ### Changed
 
 - **The commercial reservation is stated, not implied.** The README legal section now says outright that the original author reserves all commercial rights, spells out what counts as commercial or enterprise use (paid product, paid extension or plugin, hosted service or SaaS, client deliverable, internal company workflows), and gives the concrete channel to request a separate commercial license — GitHub Issues, deliberately not an address, so the published-surface guard stays meaningful. The permitted/prohibited table is labelled as a plain-language reading aid that cannot vary the license, and the FAQ answer now says "separate commercial license" rather than "a license". [`LICENSE`](LICENSE) is untouched: it remains byte-identical to the canonical PolyForm Noncommercial 1.0.0 text plus its single `Required Notice:` line, which is what the license asks for.
