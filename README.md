@@ -81,6 +81,7 @@ rules/
   multi-agent-anti-deadlock.md non-colliding task selection and workspace serialization
   strict-modularity.md      single responsibility, isolated domain modules
   user-halt-protocol.md     immediate freeze and graceful finish when user requests halt
+  zero-ignored-defects.md   fix defects in flight or register them immediately
 ```
 
 **Fail-closed by default.** A guardian that cannot verify its subject fails instead of skipping, and its message names the file, the line, the cause and the remedy — never just `expected true, got false`.

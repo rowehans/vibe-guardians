@@ -13,6 +13,7 @@ All notable changes to this project are documented here. The format follows [Kee
   - `multi-agent-anti-deadlock.md`: anti-collision task selection, single-workspace serialization, and active lease grace periods.
   - `strict-modularity.md`: enforces deep modules, single source of truth, and separation of UI components from domain math.
   - `user-halt-protocol.md`: immediate freeze and graceful drain when a human operator halts the development run.
+  - `zero-ignored-defects.md`: forbids silently bypassing bugs found in flight; mandates immediate surgical fix or formal workboard task.
 - **Discovery surface indexing** — updated `llms.txt` and `README.md` to reference the expanded rule catalog.
 
 ### Changed

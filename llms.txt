@@ -24,6 +24,7 @@ Everything here is **fail-closed by design**: a guard that cannot verify its sub
 - [rules/multi-agent-anti-deadlock.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/multi-agent-anti-deadlock.md): non-colliding task selection and single-workspace serialization.
 - [rules/strict-modularity.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/strict-modularity.md): single responsibility, isolated domain modules and pure logic separation.
 - [rules/user-halt-protocol.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/user-halt-protocol.md): immediate freeze and graceful finish when user requests a halt.
+- [rules/zero-ignored-defects.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/zero-ignored-defects.md): zero dropped defects in flight, mandatory surgical fix or workboard task.
 
 ## Working in this repository
 
