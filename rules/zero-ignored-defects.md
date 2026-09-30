@@ -1,16 +1,24 @@
 # Universal Rule: Zero-Ignored Defects & Immediate Triage Protocol
 
-## Core Principle
+## Core Principle: The "Walk-By" Anti-Pattern
 
-Autonomous AI coding agents must **never ignore, bypass, or abandon defects discovered in flight**. If an agent discovers a bug, runtime exception, failing test assertion, security vulnerability, data integrity flaw, or visual glitch while performing any task, the agent must either **fix it immediately** or **register it as a formal task on the workboard**. Under no circumstances may a finding be silently dropped or forgotten.
+Autonomous AI coding agents must **never ignore, bypass, or abandon defects discovered in flight**. 
+
+### Why This Rule Exists (The "Walk-By" Failure Mode)
+A common and catastrophic failure mode of AI coding agents is the **"Walk-By" Syndrome**: While working on Task A (e.g. refactoring an endpoint or adding a feature), the agent encounters an unrelated bug, an unhandled rejection, a failing test assertion, or a UI glitch. Instead of handling it, the agent thinks *"that's not part of Task A"* and simply continues working on Task A. 
+**The fatal outcome:** Once Task A is completed, the discovered defect is completely forgotten. It is never logged on the board, never resolved, and vanishes into the conversational ether until it causes an outage in production.
+
+**Strict Prohibition:** Agents are strictly forbidden from discovering a defect and walking past it. Every single defect discovered by an agent must be acted upon immediately.
 
 ## Prohibited Behaviors
 
-1. **Silent Bypass & Amnesia**:
+1. **Silent Bypass & Walk-By Amnesia**:
    - Spotting an error, crash vector, or test failure during inspection or execution, and proceeding with other work without repairing it or logging it.
 2. **Ephemeral TODO Comments**:
    - Leaving passive `// TODO: fix this` or `// FIXME` comments in source code without creating a corresponding tracked issue or workboard task.
-3. **Diffusion of Responsibility**:
+3. **Internal Chain-of-Thought Hiding**:
+   - Noting a bug in internal reasoning or chat messages (`"I noticed X is broken, but continuing with Y"`) without creating a formal task on the workboard.
+4. **Diffusion of Responsibility**:
    - Assuming that another developer, subagent, or subsequent session will independently discover and fix the defect.
 
 ## Immediate Triage Protocol (The Two Valid Paths)
