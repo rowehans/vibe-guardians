@@ -6,11 +6,15 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- **Anti-deadlock task queue & promotion** (`coord-core.mjs`, `agent-coord.mjs`): added `enqueue`, `queue`, and `dequeue` commands to let agents waiting on occupied scopes queue up instead of busy-waiting or idling. Upon task `finish` or `release`, the coordinator inspects waiting items and emits proactive queue promotions. Pinned by COORD-15.
+- **Canonical priority ordering**: board renders and task queries now enforce strict priority hierarchy (`P0` -> `P1` -> `P2` -> `P3`), guaranteeing that urgent security and architecture tasks are visible before normal features.
+- **Tautological assertion & placebo test detection** (`ast-async-hygiene`): static AST analyzer now catches dummy assertions (`assert.ok(true)`, `assert.equal(true, true)`, `assert.ok(items.length >= 0)`) designed to pass blindly without verifying business state. Pinned by AST-4 and HYGIENE-4.
+- **Universal Zero Secret Exposure Rule** (`rules/zero-secret-exposure.md`): strict prohibition against embedding API tokens, private PEM keys, or database credentials in client code, public configurations, or version control history.
 - **Universal Anti-Slop Engineering Rule** (`rules/anti-slop.md`): strict prohibition against mock implementations, fake dummy returns, unverified stubs, parasitic npm packages, and generic AI design clichés.
 - **Task intake and backlog creation** (`coord-core.mjs`, `agent-coord.mjs`): added `create` command to add tasks to the backlog in `available` state without immediately taking an active file lease. Pinned by COORD-12.
 - **Dependency modeling and execution gating**: added support for `dependsOn` / `--depends` in `create` and `claim`. Tasks with unfinished dependencies enter a `waiting` state on the board, and attempts to claim them fail closed until prerequisite tasks are finished. Pinned by COORD-13.
 - **Deep dependency audit**: extended `audit` to detect broken dependency references, self-dependencies, and cycles across the task dependency graph. Pinned by COORD-14.
-- **Multi-agent & operational workflow rules** — added seven core engineering protocols in `rules/`:
+- **Multi-agent & operational workflow rules** — added eight core engineering protocols in `rules/`:
   - `anti-slop.md`: zero mock implementations, zero parasitic dependencies, zero generic AI clichés.
   - `continuous-task-pipeline.md`: autonomous task intake, auto-chaining, and anti-idleness on shared workboards.
   - `dirty-worktree-isolation.md`: forbids compiling bundles or deploying over uncommitted in-flight changes.
@@ -19,6 +23,7 @@ All notable changes to this project are documented here. The format follows [Kee
   - `strict-modularity.md`: enforces deep modules, single source of truth, and separation of UI components from domain math.
   - `user-halt-protocol.md`: immediate freeze and graceful drain when a human operator halts the development run.
   - `zero-ignored-defects.md`: forbids silently bypassing bugs found in flight; mandates immediate surgical fix or formal workboard task.
+  - `zero-secret-exposure.md`: zero hardcoded credentials, service-role keys, or database passwords in source code or client bundles.
 - **Discovery surface indexing** — updated `llms.txt` and `README.md` to reference the expanded rule catalog and capabilities.
 
 ### Fixed

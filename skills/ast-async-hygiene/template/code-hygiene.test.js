@@ -83,6 +83,34 @@ export function inspectFile(filePath, code) {
           });
         }
       }
+    },
+
+    // 3. Check for tautological assertions (assert.ok(true), length >= 0)
+    CallExpression(node) {
+      const callee = node.callee;
+      if (callee.type === "MemberExpression" && callee.property.type === "Identifier") {
+        const owner = callee.object;
+        const method = callee.property.name;
+        if (owner.type === "Identifier" && (owner.name === "assert" || owner.name === "assert_")) {
+          const arg0 = node.arguments[0];
+          if ((method === "ok" || method === "equal" || method === "strictEqual") && arg0 && arg0.type === "Literal" && (arg0.value === true || arg0.value === 1)) {
+            issues.push({
+              type: "TAUTOLOGICAL_ASSERTION",
+              line: node.loc.start.line,
+              message: `Tautological assertion 'assert.${method}(${arg0.raw})' always passes without verifying real state.`
+            });
+          }
+          if (method === "ok" && arg0 && arg0.type === "BinaryExpression" && arg0.operator === ">=" &&
+              arg0.right.type === "Literal" && arg0.right.value === 0 &&
+              arg0.left.type === "MemberExpression" && arg0.left.property.name === "length") {
+            issues.push({
+              type: "TAUTOLOGICAL_ASSERTION",
+              line: node.loc.start.line,
+              message: "Tautological assertion checking length >= 0 always passes."
+            });
+          }
+        }
+      }
     }
   });
 
@@ -126,4 +154,16 @@ test("AST-3: Properly awaited calls pass cleanly", () => {
   `;
   const issues = inspectFile("test.js", goodCode);
   assert.equal(issues.length, 0, "Proper code should have 0 issues");
+});
+
+test("AST-4: Tautological assertions are flagged", () => {
+  const tautologyCode = `
+    function verify() {
+      assert.ok(true);
+      assert.ok(items.length >= 0);
+    }
+  `;
+  const issues = inspectFile("test.js", tautologyCode);
+  const tautologies = issues.filter(i => i.type === "TAUTOLOGICAL_ASSERTION");
+  assert.equal(tautologies.length, 2, "Should flag both constant and tautological length assertions");
 });

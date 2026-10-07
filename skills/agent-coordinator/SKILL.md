@@ -17,9 +17,13 @@ Use this skill when collaborating with other AI agents or developers in the same
    ```bash
    node skills/agent-coordinator/scripts/agent-coord.mjs create --id <TASK-ID> --title "Task title" --scope path/to/file --priority P1 --depends <PRE-TASK-ID>
    ```
-3. **Scope Collision Guard**: Before editing files, verify your target files are not currently locked by another active lease:
+3. **Scope Collision Guard & Anti-Deadlock Queue**: Before editing files, verify your target files are not currently locked by another active lease:
    ```bash
    node skills/agent-coordinator/scripts/agent-coord.mjs guard --agent <YourAgentName> --scope path/to/file1,path/to/file2
+   ```
+   If the scope is occupied, enqueue your task instead of busy-waiting:
+   ```bash
+   node skills/agent-coordinator/scripts/agent-coord.mjs enqueue --id <TASK-ID> --agent <YourAgentName> --scope path/to/file1,path/to/file2
    ```
 4. **Claim Lease Before Modifying**: If scope is clear and dependencies are satisfied, register your lease:
    ```bash

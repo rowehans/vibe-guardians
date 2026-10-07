@@ -36,3 +36,14 @@ test("HYGIENE-3: Clean code passes with 0 defects", () => {
   const issues = inspectFile("test.js", code);
   assert.equal(issues.length, 0);
 });
+
+test("HYGIENE-4: Flags tautological test assertions", () => {
+  const code = `
+    function check() {
+      assert.ok(true);
+      assert.strictEqual(true, true);
+    }
+  `;
+  const issues = inspectFile("test.js", code);
+  assert.equal(issues.some(i => i.type === "TAUTOLOGICAL_ASSERTION"), true);
+});

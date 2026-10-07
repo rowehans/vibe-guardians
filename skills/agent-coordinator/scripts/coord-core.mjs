@@ -44,6 +44,15 @@ const normalizeDependencies = (deps) => {
   );
 };
 
+const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
+
+function comparePriority(a, b) {
+  const pA = PRIORITY_ORDER[String(a.priority || "P2").toUpperCase()] ?? 2;
+  const pB = PRIORITY_ORDER[String(b.priority || "P2").toUpperCase()] ?? 2;
+  if (pA !== pB) return pA - pB;
+  return String(a.createdAt || "").localeCompare(String(b.createdAt || ""));
+}
+
 /**
  * Canonical form of one scope entry for comparison: forward slashes, no
  * trailing slash, no leading "./", "." (and an empty entry) meaning the repo
@@ -396,7 +405,29 @@ export function createCoordinator(root) {
           if (agent) task.closedBy = agent;
           writeJsonAtomic(tasksFile, tasks);
         }
-        return { ok: true, id, archived: Boolean(existingClaim), closed: Boolean(task), result, reason };
+        let promoted = [];
+        if (existingClaim) {
+          const releasedScope = Array.isArray(existingClaim.scope) ? existingClaim.scope : [existingClaim.scope];
+          const waiting = [];
+          for (const file of fs.readdirSync(queueDir).filter((n) => n.endsWith(".json"))) {
+            try {
+              waiting.push(JSON.parse(fs.readFileSync(path.join(queueDir, file), "utf8")));
+            } catch {}
+          }
+          waiting.sort((a, b) => String(a.enqueuedAt || "").localeCompare(String(b.enqueuedAt || "")));
+          for (const item of waiting) {
+            const overlaps = item.scope.some((itemFile) =>
+              releasedScope.some((relFile) => scopeEntriesOverlap(itemFile, relFile))
+            );
+            if (overlaps) {
+              const conflicts = scopeConflicts(item.scope.join(","), { agent: item.agent, taskId: item.id });
+              if (conflicts.length === 0) {
+                promoted.push(item);
+              }
+            }
+          }
+        }
+        return { ok: true, id, archived: Boolean(existingClaim), closed: Boolean(task), result, reason, promoted };
       });
     },
 
@@ -447,7 +478,77 @@ export function createCoordinator(root) {
           delete task.assignedTo;
           writeJsonAtomic(tasksFile, tasks);
         }
-        return { ok: true, id, released: Boolean(existingClaim) };
+        let promoted = [];
+        if (existingClaim) {
+          const releasedScope = Array.isArray(existingClaim.scope) ? existingClaim.scope : [existingClaim.scope];
+          const waiting = [];
+          for (const file of fs.readdirSync(queueDir).filter((n) => n.endsWith(".json"))) {
+            try {
+              waiting.push(JSON.parse(fs.readFileSync(path.join(queueDir, file), "utf8")));
+            } catch {}
+          }
+          waiting.sort((a, b) => String(a.enqueuedAt || "").localeCompare(String(b.enqueuedAt || "")));
+          for (const item of waiting) {
+            const overlaps = item.scope.some((itemFile) =>
+              releasedScope.some((relFile) => scopeEntriesOverlap(itemFile, relFile))
+            );
+            if (overlaps) {
+              const conflicts = scopeConflicts(item.scope.join(","), { agent: item.agent, taskId: item.id });
+              if (conflicts.length === 0) {
+                promoted.push(item);
+              }
+            }
+          }
+        }
+        return { ok: true, id, released: Boolean(existingClaim), promoted };
+      });
+    },
+
+    /** Enqueue a task waiting for an occupied scope. */
+    enqueue({ id, agent = "AnonymousAgent", scope }) {
+      if (!id) throw new Error("--id is required for enqueue.");
+      const wanted = normalizeScope(scope);
+      if (wanted.length === 0) throw new Error("--scope is required for enqueue.");
+      return withLock(() => {
+        const item = {
+          id,
+          agent,
+          scope: wanted,
+          enqueuedAt: new Date().toISOString(),
+        };
+        const safeFile = `${id}__${agent.replace(/[^a-zA-Z0-9_-]/g, "_")}.json`;
+        writeJsonAtomic(path.join(queueDir, safeFile), item);
+        return { ok: true, id, agent, item };
+      });
+    },
+
+    /** Read all queue entries sorted by wait time. */
+    queue() {
+      ensureDirs();
+      const items = [];
+      for (const file of fs.readdirSync(queueDir).filter((n) => n.endsWith(".json"))) {
+        try {
+          items.push(JSON.parse(fs.readFileSync(path.join(queueDir, file), "utf8")));
+        } catch {}
+      }
+      return items.sort((a, b) => String(a.enqueuedAt || "").localeCompare(String(b.enqueuedAt || "")));
+    },
+
+    /** Dequeue an entry by ID and optionally agent. */
+    dequeue({ id, agent }) {
+      if (!id) throw new Error("--id is required for dequeue.");
+      return withLock(() => {
+        let removed = false;
+        for (const file of fs.readdirSync(queueDir).filter((n) => n.endsWith(".json"))) {
+          try {
+            const data = JSON.parse(fs.readFileSync(path.join(queueDir, file), "utf8"));
+            if (data.id === id && (!agent || data.agent === agent)) {
+              fs.unlinkSync(path.join(queueDir, file));
+              removed = true;
+            }
+          } catch {}
+        }
+        return { ok: true, id, removed };
       });
     },
 
@@ -520,21 +621,37 @@ export function createCoordinator(root) {
     board() {
       const tasks = readTasks();
       const claims = activeClaims();
-      const enrichedTasks = tasks.map((task) => {
-        const isAvailable = task.status === "available";
-        const deps = Array.isArray(task.dependsOn) ? task.dependsOn : [];
-        const pendingDeps = deps.filter((depId) => {
-          const dep = tasks.find((t) => t.id === depId);
-          return !dep || dep.status !== "done";
-        });
-        const effectiveStatus = isAvailable && pendingDeps.length > 0 ? "waiting" : task.status || "unknown";
-        return {
-          ...task,
-          effectiveStatus,
-          pendingDependencies: pendingDeps,
-        };
-      });
-      return { tasks: enrichedTasks, claims: claims.map(({ isExpired, ...claim }) => ({ ...claim, expired: isExpired === true })) };
+      const waitingQueue = [];
+      ensureDirs();
+      for (const file of fs.readdirSync(queueDir).filter((n) => n.endsWith(".json"))) {
+        try {
+          waitingQueue.push(JSON.parse(fs.readFileSync(path.join(queueDir, file), "utf8")));
+        } catch {}
+      }
+      waitingQueue.sort((a, b) => String(a.enqueuedAt || "").localeCompare(String(b.enqueuedAt || "")));
+
+      const enrichedTasks = tasks
+        .map((task) => {
+          const isAvailable = task.status === "available";
+          const deps = Array.isArray(task.dependsOn) ? task.dependsOn : [];
+          const pendingDeps = deps.filter((depId) => {
+            const dep = tasks.find((t) => t.id === depId);
+            return !dep || dep.status !== "done";
+          });
+          const effectiveStatus = isAvailable && pendingDeps.length > 0 ? "waiting" : task.status || "unknown";
+          return {
+            ...task,
+            effectiveStatus,
+            pendingDependencies: pendingDeps,
+          };
+        })
+        .sort(comparePriority);
+
+      return {
+        tasks: enrichedTasks,
+        claims: claims.map(({ isExpired, ...claim }) => ({ ...claim, expired: isExpired === true })),
+        queue: waitingQueue,
+      };
     },
   };
 }

@@ -203,8 +203,13 @@ function cmdFinish(opts) {
     console.error("Error: --reason is required; explain why the work was done.");
     process.exit(1);
   }
-  coord.finish({ id: opts.id, agent: opts.agent, result: opts.result, reason: opts.reason });
+  const fin = coord.finish({ id: opts.id, agent: opts.agent, result: opts.result, reason: opts.reason });
   console.log(`${GREEN}[FINISH]${RESET} Task '${opts.id}' marked as done and claim released.`);
+  if (fin.promoted && fin.promoted.length > 0) {
+    for (const p of fin.promoted) {
+      console.log(`${CYAN}[QUEUE PROMOTION]${RESET} Task '${p.id}' (${p.agent}) can now claim scope: ${p.scope.join(", ")}`);
+    }
+  }
 }
 
 function cmdReview(opts) {
@@ -225,8 +230,48 @@ function cmdRelease(opts) {
     console.error("Error: --agent is required for release: only the lease holder may drop a lease.");
     process.exit(1);
   }
-  coord.release({ id: opts.id, agent: opts.agent });
+  const rel = coord.release({ id: opts.id, agent: opts.agent });
   console.log(`${YELLOW}[RELEASE]${RESET} Claim on '${opts.id}' released.`);
+  if (rel.promoted && rel.promoted.length > 0) {
+    for (const p of rel.promoted) {
+      console.log(`${CYAN}[QUEUE PROMOTION]${RESET} Task '${p.id}' (${p.agent}) can now claim scope: ${p.scope.join(", ")}`);
+    }
+  }
+}
+
+function cmdEnqueue(opts) {
+  if (!opts.id) {
+    console.error("Error: --id is required for enqueue.");
+    process.exit(1);
+  }
+  if (!opts.scope) {
+    console.error("Error: --scope is required for enqueue.");
+    process.exit(1);
+  }
+  const enq = coord.enqueue({ id: opts.id, agent: opts.agent || "AnonymousAgent", scope: opts.scope });
+  console.log(`${GREEN}[ENQUEUE SUCCESS]${RESET} Task '${enq.id}' queued for scope '${enq.item.scope.join(", ")}'.`);
+}
+
+function cmdQueue() {
+  const items = coord.queue();
+  console.log(`${CYAN}[COORDINATION QUEUE]${RESET} ${items.length} tasks waiting for scopes:\n`);
+  if (items.length === 0) {
+    console.log("Queue is empty. No tasks waiting.");
+    return;
+  }
+  for (const item of items) {
+    console.log(`- ${GREEN}${item.id}${RESET} [${item.agent}] (queued at: ${item.enqueuedAt})`);
+    console.log(`  Waiting for scope: ${item.scope.join(", ")}`);
+  }
+}
+
+function cmdDequeue(opts) {
+  if (!opts.id) {
+    console.error("Error: --id is required for dequeue.");
+    process.exit(1);
+  }
+  const res = coord.dequeue({ id: opts.id, agent: opts.agent });
+  console.log(`${YELLOW}[DEQUEUE]${RESET} Task '${opts.id}' removed from queue (found: ${res.removed}).`);
 }
 
 function cmdAudit() {
@@ -271,6 +316,13 @@ function cmdBoard(opts) {
     }
     console.log("");
   }
+  if (Array.isArray(board.queue) && board.queue.length > 0) {
+    console.log(`${YELLOW}WAITING QUEUE${RESET} (${board.queue.length})`);
+    for (const item of board.queue) {
+      console.log(`  [QUEUE] ${item.id} (${item.agent}) waiting for: ${item.scope.join(", ")}`);
+    }
+    console.log("");
+  }
 }
 
 function cmdHelp() {
@@ -305,6 +357,15 @@ Commands:
   audit      Validate board integrity, duplicate IDs, broken references, and cycles
              node agent-coord.mjs audit
 
+  enqueue    Enqueue a task waiting for an occupied scope to be released
+             node agent-coord.mjs enqueue --id TASK-105 --agent AgentB --scope src/app.js
+
+  queue      List all tasks currently waiting in the coordination queue
+             node agent-coord.mjs queue
+
+  dequeue    Remove an enqueued task from the coordination queue
+             node agent-coord.mjs dequeue --id TASK-105 --agent AgentB
+
   board      Print the task board, grouped by status (--json for raw data)
              node agent-coord.mjs board --json
 
@@ -327,6 +388,9 @@ export async function runCli(argv = process.argv.slice(2)) {
       case "finish": cmdFinish(parsed); break;
       case "review": cmdReview(parsed); break;
       case "release": cmdRelease(parsed); break;
+      case "enqueue": cmdEnqueue(parsed); break;
+      case "queue": cmdQueue(); break;
+      case "dequeue": cmdDequeue(parsed); break;
       case "audit": cmdAudit(); break;
       case "board": cmdBoard(parsed); break;
       case "help":

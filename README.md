@@ -83,6 +83,7 @@ rules/
   strict-modularity.md      single responsibility, isolated domain modules
   user-halt-protocol.md     immediate freeze and graceful finish when user requests halt
   zero-ignored-defects.md   fix defects in flight or register them immediately
+  zero-secret-exposure.md   zero hardcoded secrets or service keys in client/code
 ```
 
 **Fail-closed by default.** A guardian that cannot verify its subject fails instead of skipping, and its message names the file, the line, the cause and the remedy — never just `expected true, got false`.

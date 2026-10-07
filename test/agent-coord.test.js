@@ -347,3 +347,49 @@ test("COORD-14: audit detects broken references, self-dependencies, and cycles",
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("COORD-15: task queue enables anti-deadlock waiting and notifies on lease release", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "vibe-guardians-queue-"));
+  try {
+    const coord = createCoordinator(root);
+    // AgentA claims src/core.js
+    coord.claim({ id: "TASK-BUSY", agent: "AgentA", scope: "src/core.js", minutes: 30 });
+
+    // AgentB wants src/core.js but collides
+    const check = coord.guard({ agent: "AgentB", scope: "src/core.js" });
+    assert.equal(check.ok, false);
+
+    // AgentB enqueues instead of idling or polling in a hot loop
+    const enq = coord.enqueue({ id: "TASK-WAITING", agent: "AgentB", scope: "src/core.js" });
+    assert.equal(enq.ok, true);
+
+    // Queue reports waiting item
+    const queueList = coord.queue();
+    assert.equal(queueList.length, 1);
+    assert.equal(queueList[0].id, "TASK-WAITING");
+    assert.equal(queueList[0].agent, "AgentB");
+
+    // Board lists tasks and the waiting queue
+    const board = coord.board();
+    assert.equal(board.queue.length, 1);
+
+    // When AgentA finishes the task, the coordinator notifies that AgentB is promoted
+    const finishRes = coord.finish({
+      id: "TASK-BUSY",
+      agent: "AgentA",
+      result: "Core updated",
+      reason: "Required feature",
+    });
+    assert.equal(finishRes.ok, true);
+    assert.equal(finishRes.promoted.length, 1);
+    assert.equal(finishRes.promoted[0].id, "TASK-WAITING");
+
+    // Dequeue cleans up
+    const deq = coord.dequeue({ id: "TASK-WAITING", agent: "AgentB" });
+    assert.equal(deq.ok, true);
+    assert.equal(deq.removed, true);
+    assert.equal(coord.queue().length, 0);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
