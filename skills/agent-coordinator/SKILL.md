@@ -13,15 +13,19 @@ Use this skill when collaborating with other AI agents or developers in the same
    ```bash
    node skills/agent-coordinator/scripts/agent-coord.mjs status
    ```
-2. **Scope Collision Guard**: Before editing files, verify your target files are not currently locked by another active lease:
+2. **Backlog Task Intake**: To register new work without claiming it immediately:
+   ```bash
+   node skills/agent-coordinator/scripts/agent-coord.mjs create --id <TASK-ID> --title "Task title" --scope path/to/file --priority P1 --depends <PRE-TASK-ID>
+   ```
+3. **Scope Collision Guard**: Before editing files, verify your target files are not currently locked by another active lease:
    ```bash
    node skills/agent-coordinator/scripts/agent-coord.mjs guard --agent <YourAgentName> --scope path/to/file1,path/to/file2
    ```
-3. **Claim Lease Before Modifying**: If scope is clear, register your lease:
+4. **Claim Lease Before Modifying**: If scope is clear and dependencies are satisfied, register your lease:
    ```bash
    node skills/agent-coordinator/scripts/agent-coord.mjs claim --id <TASK-ID> --agent <YourAgentName> --scope path/to/file1,path/to/file2 --minutes 60
    ```
-4. **Release or Finish Upon Completion**:
+5. **Release or Finish Upon Completion**:
    - If work is finished and verified:
      ```bash
      node skills/agent-coordinator/scripts/agent-coord.mjs finish --id <TASK-ID> --agent <YourAgentName> --result "What changed; tests that passed" --reason "Why the work was needed"

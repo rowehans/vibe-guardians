@@ -18,6 +18,7 @@ Everything here is **fail-closed by design**: a guard that cannot verify its sub
 
 - [rules/fail-closed-builds.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/fail-closed-builds.md): why a check that cannot run must fail the build, and how to write such a check.
 - [rules/anti-overfitting.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/anti-overfitting.md): how to keep tests meaningful instead of tuned to pass.
+- [rules/anti-slop.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/anti-slop.md): zero fake stubs or dummy returns, zero parasitic dependencies, zero generic AI design clichés.
 - [rules/continuous-task-pipeline.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/continuous-task-pipeline.md): continuous task intake and non-stagnant backlog progress.
 - [rules/dirty-worktree-isolation.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/dirty-worktree-isolation.md): zero builds or deploys over uncommitted in-flight changes.
 - [rules/empirical-flow-verification.md](https://raw.githubusercontent.com/rowehans/vibe-guardians/main/rules/empirical-flow-verification.md): terminal proof before assertions, evidence before completion.

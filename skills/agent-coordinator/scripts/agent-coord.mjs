@@ -9,7 +9,7 @@
  * Zero external dependencies. Pure Node.js ESM.
  *
  * This file is only the command-line face: the rules live in coord-core.mjs so
- * that the MCP server (mcp-server.mjs) enforces exactly the same ones.
+ * that any other front-end enforces exactly the same ones.
  */
 
 import process from "node:process";
@@ -126,6 +126,8 @@ function cmdStatus() {
 }
 
 function cmdGuard(opts) {
+  // coord.guard throws on an empty scope (fail-closed); runCli turns that into
+  // a clean exit 1 with the remedy in the message.
   const verdict = coord.guard({ agent: opts.agent || "UNKNOWN", scope: opts.scope, taskId: opts.id });
   if (verdict.scope.length === 0) {
     console.log(`${GREEN}[GUARD PASS]${RESET} Scope empty or unconstrained.`);
@@ -136,6 +138,22 @@ function cmdGuard(opts) {
     process.exit(1);
   }
   console.log(`${GREEN}[GUARD PASS]${RESET} Scope is clear of active collisions.`);
+}
+
+function cmdCreate(opts) {
+  if (!opts.id) {
+    console.error("Error: --id is required for create.");
+    process.exit(1);
+  }
+  const result = coord.create({
+    id: opts.id,
+    title: opts.title,
+    scope: opts.scope,
+    priority: opts.priority || "P2",
+    dependsOn: opts.depends || opts.dependsOn,
+    createdBy: opts.agent || "AnonymousAgent",
+  });
+  console.log(`${GREEN}[CREATE SUCCESS]${RESET} Task '${result.id}' added to backlog (available).`);
 }
 
 function cmdClaim(opts) {
@@ -153,8 +171,15 @@ function cmdClaim(opts) {
     summary: opts.summary,
     create: Boolean(opts.create),
     priority: opts.priority || "P2",
+    dependsOn: opts.depends || opts.dependsOn,
   });
   if (!result.ok) {
+    if (result.blocked) {
+      console.error(
+        `${RED}[CLAIM BLOCKED] Task '${opts.id}' is waiting on pending dependencies: ${result.pendingDependencies.join(", ")}${RESET}`
+      );
+      process.exit(1);
+    }
     reportConflicts(result.conflicts);
     process.exit(1);
   }
@@ -164,6 +189,10 @@ function cmdClaim(opts) {
 function cmdFinish(opts) {
   if (!opts.id) {
     console.error("Error: --id is required.");
+    process.exit(1);
+  }
+  if (!opts.agent || !String(opts.agent).trim()) {
+    console.error("Error: --agent is required for finish: closure must be attributable to the agent doing it.");
     process.exit(1);
   }
   if (!opts.result) {
@@ -192,7 +221,11 @@ function cmdRelease(opts) {
     console.error("Error: --id is required.");
     process.exit(1);
   }
-  coord.release({ id: opts.id });
+  if (!opts.agent || !String(opts.agent).trim()) {
+    console.error("Error: --agent is required for release: only the lease holder may drop a lease.");
+    process.exit(1);
+  }
+  coord.release({ id: opts.id, agent: opts.agent });
   console.log(`${YELLOW}[RELEASE]${RESET} Claim on '${opts.id}' released.`);
 }
 
@@ -214,12 +247,12 @@ function cmdBoard(opts) {
   }
   const columns = new Map();
   for (const task of board.tasks) {
-    const status = task.status || "unknown";
+    const status = task.effectiveStatus || task.status || "unknown";
     if (!columns.has(status)) columns.set(status, []);
     columns.get(status).push(task);
   }
   if (columns.size === 0) {
-    console.log("Board is empty. Create one with: claim --create --id TASK-001 --scope src/");
+    console.log("Board is empty. Create one with: create --id TASK-001 --title 'New task'");
     return;
   }
   for (const [status, tasks] of columns) {
@@ -227,7 +260,11 @@ function cmdBoard(opts) {
     for (const task of tasks) {
       const lease = board.claims.find((claim) => claim.taskId === task.id);
       const holder = lease ? ` -> ${lease.agent}` : "";
-      console.log(`  ${task.priority || "P2"}  ${task.id}  ${task.title || ""}${holder}`);
+      const waitingNote =
+        Array.isArray(task.pendingDependencies) && task.pendingDependencies.length > 0
+          ? ` ${YELLOW}(waiting on: ${task.pendingDependencies.join(", ")})${RESET}`
+          : "";
+      console.log(`  ${task.priority || "P2"}  ${task.id}  ${task.title || ""}${holder}${waitingNote}`);
       for (const review of task.reviews || []) {
         console.log(`    Reviewed by ${review.reviewedBy}: ${review.summary}. Reason: ${review.reason}`);
       }
@@ -247,9 +284,13 @@ Commands:
   guard      Verify if declared file scope conflicts with another active AI lease
              node agent-coord.mjs guard --agent Cursor --scope src/app.js,test/app.test.js
 
+  create     Add a new task directly to backlog without claiming it
+             node agent-coord.mjs create --id TASK-103 --title "Refactor storage" --scope src/storage/ --priority P1
+             node agent-coord.mjs create --id TASK-104 --title "Add tests" --scope test/ --depends TASK-103
+
   claim      Claim a task lease and lock its scope
              node agent-coord.mjs claim --id TASK-101 --agent ClaudeCode --scope src/app.js --minutes 60
-             node agent-coord.mjs claim --create --id TASK-102 --title "New feature" --agent Antigravity --scope src/
+             node agent-coord.mjs claim --create --id TASK-102 --title "New feature" --agent Antigravity --scope src/ --depends TASK-101
 
   finish     Mark task as completed, archive evidence and release file lock
              node agent-coord.mjs finish --id TASK-101 --agent ClaudeCode --result "What changed and verification" --reason "Why the work was needed"
@@ -257,10 +298,11 @@ Commands:
   review     Record a review of a completed task without replacing its author or closure details
              node agent-coord.mjs review --id TASK-101 --reviewer Reviewer --summary "What was checked" --reason "Why it passes"
 
-  release    Release task lease without marking it completed
+  release    Release your own task lease without marking the task completed
              node agent-coord.mjs release --id TASK-101 --agent ClaudeCode
+             (--agent is required: another agent's lease cannot be dropped from under it)
 
-  audit      Validate board integrity, duplicate IDs and malformed records
+  audit      Validate board integrity, duplicate IDs, broken references, and cycles
              node agent-coord.mjs audit
 
   board      Print the task board, grouped by status (--json for raw data)
@@ -276,21 +318,30 @@ export async function runCli(argv = process.argv.slice(2)) {
   const command = argv[0];
   const parsed = parseArgs(argv.slice(1));
 
-  switch (command) {
-    case "status": cmdStatus(); break;
-    case "guard": cmdGuard(parsed); break;
-    case "claim": cmdClaim(parsed); break;
-    case "finish": cmdFinish(parsed); break;
-    case "review": cmdReview(parsed); break;
-    case "release": cmdRelease(parsed); break;
-    case "audit": cmdAudit(); break;
-    case "board": cmdBoard(parsed); break;
-    case "help":
-    case "--help":
-    case "-h":
-    default:
-      cmdHelp();
-      break;
+  try {
+    switch (command) {
+      case "status": cmdStatus(); break;
+      case "guard": cmdGuard(parsed); break;
+      case "create": cmdCreate(parsed); break;
+      case "claim": cmdClaim(parsed); break;
+      case "finish": cmdFinish(parsed); break;
+      case "review": cmdReview(parsed); break;
+      case "release": cmdRelease(parsed); break;
+      case "audit": cmdAudit(); break;
+      case "board": cmdBoard(parsed); break;
+      case "help":
+      case "--help":
+      case "-h":
+      default:
+        cmdHelp();
+        break;
+    }
+  } catch (error) {
+    // FAIL-CLOSED surfaced as a clean CLI error: a corrupt board, a dead lock
+    // that could not be recovered or a refused closure must exit non-zero with
+    // the cause and remedy, never a bare stack trace or a silent pass.
+    console.error(`${RED}[AGENT-COORD ERROR]${RESET} ${error.message}`);
+    process.exit(1);
   }
 }
 

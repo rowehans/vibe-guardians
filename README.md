@@ -75,6 +75,7 @@ skills/
 rules/
   fail-closed-builds.md     why an unverifiable check must fail the build
   anti-overfitting.md       how to keep a test meaningful instead of tuned
+  anti-slop.md              zero mock implementations, zero parasitic packages
   continuous-task-pipeline.md continuous intake and non-stagnant backlog progress
   dirty-worktree-isolation.md zero builds or deploys over uncommitted in-flight changes
   empirical-flow-verification.md terminal proof before assertions, evidence before completion
